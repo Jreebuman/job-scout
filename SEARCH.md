@@ -57,7 +57,9 @@ Write a JSON array per person to the scratchpad directory, objects with:
 
 - id: `<source>-<site job id>` lowercase (e.g. `bayt-73668558`, `linkedin-4012345678`, `akhtaboot-167451`); if none is visible, a slug of company + title. Skip ids that person already has.
 - company: the real company name when shown (the page builds a "Who do you know here?" LinkedIn link from it); "Confidential" when hidden.
-- summary: 2-3 sentences in your own words, never copied. score_why: one plain sentence. matched: 2-4 short phrases taken only from that person's own profile, CV or LinkedIn. gaps: short phrases.
+- summary: shown as "What you'd be doing". 2-4 plain sentences in your own words, never copied, so the person knows what they're heading into: what the company is (one phrase), the day-to-day work, and the main must-haves (years, degree, languages, shift pattern). The first sentence also appears on the list row, so make it the day-to-day.
+- work_type (on-site / hybrid / remote, plus shifts if stated), level and salary: fill them whenever the post says; leave empty rather than guess.
+- score_why: one plain sentence. matched: 2-4 short phrases taken only from that person's own profile, CV or LinkedIn. gaps: short phrases.
 - Never invent facts about a person. No cover letters or messages.
 
 Run save-matches.ps1 for each person, including with a file containing `[]` for anyone with no new matches, so their "last checked" date updates and their Run-now request clears.
