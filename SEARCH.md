@@ -60,7 +60,13 @@ Write a JSON array per person to the scratchpad directory, objects with:
 - summary: shown as "What you'd be doing". 2-4 plain sentences in your own words, never copied, so the person knows what they're heading into: what the company is (one phrase), the day-to-day work, and the main must-haves (years, degree, languages, shift pattern). The first sentence also appears on the list row, so make it the day-to-day.
 - work_type (on-site / hybrid / remote, plus shifts if stated), level and salary: fill them whenever the post says; leave empty rather than guess.
 - score_why: one plain sentence. matched: 2-4 short phrases taken only from that person's own profile, CV or LinkedIn. gaps: short phrases.
-- Never invent facts about a person. No cover letters or messages.
+- how_to_apply: if the post names a specific apply email, phone or form (rather than the site's own Apply button), copy it exactly. Otherwise leave empty.
+- Drafts, only for jobs scoring 60 or more (leave the three fields empty below 60):
+  - msg_en: about 80 words to the recruiter or hiring manager. Name the role, one or two real points from the person's CV that fit the job (with real numbers if their CV has them), and a simple ask (a short call, or to consider their application). Sign with their name as written in their profile.
+  - msg_ar: the same message in natural, professional Arabic. Not word-for-word, not slang. Sign with their name.
+  - cover: about 200 words. Opening that names the role and company, two short paragraphs mapping their CV to the job's requirements, a short close, signed with their name.
+  - Use only facts from that person's profile, CV text and LinkedIn. Never claim a degree, certificate, tool or number they didn't state. Don't mention salary.
+- Never invent facts about a person.
 
 Run save-matches.ps1 for each person, including with a file containing `[]` for anyone with no new matches, so their "last checked" date updates and their Run-now request clears.
 

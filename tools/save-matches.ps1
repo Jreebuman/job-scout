@@ -2,7 +2,8 @@
 # Skips ids already saved.
 # Usage: powershell -File tools\save-matches.ps1 -ProfileId <uuid> -JsonFile <path>
 # JsonFile: a JSON array of objects with keys id, title, company, location, work_type, salary,
-# level, posted_at, url, source, summary, score (int), score_why, matched (array), gaps (array).
+# level, posted_at, url, source, summary, score (int), score_why, matched (array), gaps (array),
+# and optionally msg_en, msg_ar, cover, how_to_apply.
 param([Parameter(Mandatory)][guid]$ProfileId, [Parameter(Mandatory)][string]$JsonFile)
 $ErrorActionPreference = 'Stop'
 $json = [IO.File]::ReadAllText((Resolve-Path $JsonFile))
@@ -11,14 +12,16 @@ if ($json.Contains('$js$')) { throw 'JSON may not contain the text $js$' }
 $sql = @"
 with ins as (
   insert into public.matches (profile_id, id, title, company, location, work_type, salary, level,
-    posted_at, url, source, summary, score, score_why, matched, gaps)
+    posted_at, url, source, summary, score, score_why, matched, gaps, msg_en, msg_ar, cover, how_to_apply)
   select '$ProfileId'::uuid, r.id, r.title, coalesce(r.company,''), coalesce(r.location,''),
     coalesce(r.work_type,''), coalesce(r.salary,''), coalesce(r.level,''), coalesce(r.posted_at,''),
     coalesce(r.url,''), coalesce(r.source,''), coalesce(r.summary,''), coalesce(r.score,0),
-    coalesce(r.score_why,''), coalesce(r.matched,'{}'), coalesce(r.gaps,'{}')
+    coalesce(r.score_why,''), coalesce(r.matched,'{}'), coalesce(r.gaps,'{}'),
+    left(coalesce(r.msg_en,''),3000), left(coalesce(r.msg_ar,''),3000), left(coalesce(r.cover,''),6000),
+    left(coalesce(r.how_to_apply,''),500)
   from jsonb_to_recordset(`$js`$$json`$js`$::jsonb) as r(id text, title text, company text, location text,
     work_type text, salary text, level text, posted_at text, url text, source text, summary text,
-    score int, score_why text, matched text[], gaps text[])
+    score int, score_why text, matched text[], gaps text[], msg_en text, msg_ar text, cover text, how_to_apply text)
   where r.id is not null and r.title is not null
   on conflict (profile_id, id) do nothing
   returning id

@@ -1,6 +1,6 @@
 // Network first so updates show up right away; cached copy only when offline.
 // Database calls (supabase.co) and CDN files are never intercepted.
-const CACHE = 'job-scout-v1';
+const CACHE = 'job-scout-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
