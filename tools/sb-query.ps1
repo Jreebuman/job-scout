@@ -9,4 +9,6 @@ $res = Invoke-WebRequest -Method Post -Uri "https://api.supabase.com/v1/projects
   -Headers @{ Authorization = "Bearer $token"; 'Content-Type' = 'application/json' } `
   -Body ([Text.Encoding]::UTF8.GetBytes($body)) -UseBasicParsing
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
-$res.Content
+# Decode the raw bytes as UTF-8; .Content guesses Latin-1 and garbles Arabic and punctuation.
+$bytes = $res.RawContentStream.ToArray()
+[Text.Encoding]::UTF8.GetString($bytes)
