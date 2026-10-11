@@ -46,6 +46,15 @@
   .installbar strong{display:block; font-size:14.5px;}
   .installbar button{font:inherit; font-weight:700; font-size:13.5px; background:var(--accent); color:var(--on-accent); border:none; border-radius:7px; padding:8px 14px; cursor:pointer; flex:none;}
   .installbar .x{background:none; color:var(--bg); opacity:.7; padding:4px 6px; font-size:18px;}
+  @media (max-width:520px){
+    .summary{flex-direction:column; gap:14px;}
+    .summary dl{width:100%;}
+    .actions{width:100%;}
+    .actions button{flex:1; padding:11px 14px !important;}
+  }
+  .keybox.compact{padding:10px 14px; background:var(--surface); border-color:var(--line);}
+  .keybox.compact strong{font-size:13px; font-family:var(--font-body); font-style:normal; font-weight:600; color:var(--muted);}
+  .keybox.compact p{display:none;}
   .restore{margin:-8px 0 22px; font-size:13.5px; color:var(--muted);}
   .restore summary{cursor:pointer; text-decoration:underline;}
   .restore .linkrow{margin-top:8px;}
@@ -472,7 +481,12 @@
     });
     $('summaryCard').hidden = false; $('form').hidden = true;
   }
-  function showKey(k){ $('keyLink').value = linkFor(k); $('keyBox').hidden = false; }
+  var justCreated = false;
+  function showKey(k){
+    $('keyLink').value = linkFor(k); $('keyBox').hidden = false;
+    $('keyBox').classList.toggle('compact', !justCreated);
+    $('keyBox').querySelector('strong').textContent = justCreated ? 'Save your private link' : 'Your private link';
+  }
 
   function extLink(text, href){ var a = el('a', null, text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; }
   function showLinkedIn(p){
@@ -603,7 +617,7 @@
     $('saveBtn').disabled = true; setStatus($('formStatus'), 'Saving…');
     var editing = !!(profile && accessKey);
     var job = editing ? rpc('update_profile', {k:accessKey, p:p}).then(function(){ return accessKey; }) : rpc('submit_profile', {p:p});
-    job.then(function(k){ return load(k); })
+    job.then(function(k){ justCreated = !editing; return load(k); })
       .then(function(){ setStatus($('formStatus'), ''); if(!editing) $('keyBox').scrollIntoView({behavior:'smooth', block:'start'}); })
       .catch(function(err){ setStatus($('formStatus'), "Couldn't save: " + err.message + '. Check your connection and try again.', true); })
       .then(function(){ $('saveBtn').disabled = false; });
