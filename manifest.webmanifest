@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Job Scout",
+  "short_name": "Job Scout",
+  "description": "Upload your CV once. Job Scout checks Jordan's job boards every day and brings back what matches.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EDF0EB",
+  "theme_color": "#1B241D",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,4 +1,5 @@
-# Saves scored matches for one profile and records the run. Skips ids already saved.
+# Saves scored matches for one profile, records the run and clears any pending "Run now" request.
+# Skips ids already saved.
 # Usage: powershell -File tools\save-matches.ps1 -ProfileId <uuid> -JsonFile <path>
 # JsonFile: a JSON array of objects with keys id, title, company, location, work_type, salary,
 # level, posted_at, url, source, summary, score (int), score_why, matched (array), gaps (array).
@@ -25,6 +26,8 @@ with ins as (
   insert into public.runs (profile_id, last_run_at, matches_found)
   values ('$ProfileId'::uuid, now(), (select count(*) from ins))
   on conflict (profile_id) do update set last_run_at = excluded.last_run_at, matches_found = excluded.matches_found
+), clr as (
+  update public.profiles set run_requested_at = null where id = '$ProfileId'::uuid
 )
 select count(*) as saved from ins;
 "@

@@ -2,10 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Job Scout</title>
 <meta name="description" content="Tell Job Scout what you do and what you're after. It checks Jordan's job boards every day and brings back what matches.">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#1B241D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Job Scout">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -28,8 +36,19 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;}
-  body{background:var(--bg); color:var(--fg); padding:0 18px; font-family:var(--font-body); font-size:15px; line-height:1.5;}
+  body{background:var(--bg); color:var(--fg); padding:env(safe-area-inset-top, 0px) max(18px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(18px, env(safe-area-inset-left, 0px)); font-family:var(--font-body); font-size:15px; line-height:1.5; -webkit-text-size-adjust:100%;}
   .wrap{max-width:720px; margin:0 auto; padding-block:32px 64px;}
+  @media (max-width:520px){ .wrap{padding-block:20px 48px;} .masthead h1{font-size:30px;} .card{padding:18px 16px 20px;} }
+  input, textarea, .ms-search{font-size:16px !important;} /* stops iPhone zooming in on focus */
+  .installbar{display:flex; align-items:center; gap:12px; background:var(--fg); color:var(--bg); border-radius:10px; padding:12px 14px; margin-bottom:18px;}
+  .installbar img{width:36px; height:36px; border-radius:8px; flex:none;}
+  .installbar div{flex:1; min-width:0; font-size:13.5px; line-height:1.35;}
+  .installbar strong{display:block; font-size:14.5px;}
+  .installbar button{font:inherit; font-weight:700; font-size:13.5px; background:var(--accent); color:var(--on-accent); border:none; border-radius:7px; padding:8px 14px; cursor:pointer; flex:none;}
+  .installbar .x{background:none; color:var(--bg); opacity:.7; padding:4px 6px; font-size:18px;}
+  .restore{margin:-8px 0 22px; font-size:13.5px; color:var(--muted);}
+  .restore summary{cursor:pointer; text-decoration:underline;}
+  .restore .linkrow{margin-top:8px;}
   .masthead{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; border-bottom:2px solid var(--fg); padding-bottom:14px; margin-bottom:22px;}
   .masthead h1{font-family:var(--font-display); font-weight:600; font-size:34px; margin:0; letter-spacing:-0.01em;}
   .stamp{font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); border-radius:3px; padding:4px 8px; white-space:nowrap;}
@@ -92,7 +111,16 @@
   .summary dl{display:grid; grid-template-columns:auto 1fr; gap:4px 14px; margin:0; font-size:13.5px; min-width:0; flex:1;}
   .summary dt{color:var(--muted);}
   .summary dd{margin:0; overflow-wrap:anywhere;}
-  .actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .actions{display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start;}
+  .actions button.primary{padding:8px 16px; font-size:13.5px;}
+  .runstatus{margin:14px 0 0;}
+  .runstatus:empty{display:none;}
+  .runstatus.queued{color:var(--good);}
+  .li-box{border-top:1px solid var(--line); margin-top:16px; padding-top:14px;}
+  .li-links{display:flex; flex-wrap:wrap; gap:8px;}
+  .li-links a{font-size:13px; font-weight:600; color:var(--accent); text-decoration:none; border:1px solid var(--line); border-radius:20px; padding:5px 12px;}
+  .li-links a:hover{border-color:var(--accent);}
+  .foot .links{display:flex; gap:14px; flex-wrap:wrap;}
   .section-title{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:30px 0 14px;}
   .section-title h2{font-family:var(--font-display); font-style:italic; font-weight:500; font-size:21px; margin:0;}
   .meta{font-family:var(--font-mono); font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
@@ -128,6 +156,22 @@
   </header>
   <p class="tagline" id="tagline">Tell us what you do and what you're after. Every evening the scout checks Bayt, LinkedIn and Akhtaboot, and brings back what matches. No account, and nobody applies on your behalf.</p>
 
+  <div class="installbar" id="installBar" hidden>
+    <img src="icons/icon-192.png" alt="">
+    <div><strong>Put Job Scout on your phone</strong><span id="installHow">Opens like an app, straight to your matches.</span></div>
+    <button type="button" id="installBtn" hidden>Install</button>
+    <button type="button" class="x" id="installClose" aria-label="Hide">&times;</button>
+  </div>
+
+  <details class="restore" id="restoreBox">
+    <summary>Already signed up? Open your profile</summary>
+    <div class="linkrow">
+      <input type="text" id="restoreInput" placeholder="Paste your private link" aria-label="Your private link">
+      <button class="ghost" type="button" id="restoreBtn">Open</button>
+    </div>
+    <span class="status" id="restoreStatus"></span>
+  </details>
+
   <div class="keybox" id="keyBox" hidden>
     <strong>Save your private link</strong>
     <p>This link is how you get back to your matches. Anyone with it can see them, so keep it to yourself. Bookmark it or send it to yourself on WhatsApp.</p>
@@ -141,8 +185,15 @@
     <div class="summary">
       <dl id="summaryList"></dl>
       <div class="actions">
+        <button class="primary" type="button" id="runBtn">Run now</button>
         <button class="ghost" type="button" id="editBtn">Edit</button>
       </div>
+    </div>
+    <p class="status runstatus" id="runStatus" role="status"></p>
+    <div class="li-box" id="liBox" hidden>
+      <span class="label">Search LinkedIn with your own account</span>
+      <p class="sub" style="margin:0 0 8px">Opens in your LinkedIn, so you see jobs recommended to you and where your connections work.</p>
+      <div class="li-links" id="liLinks"></div>
     </div>
   </section>
 
@@ -158,6 +209,7 @@
         <input type="file" id="f-file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
         <span class="sub" style="margin:0">PDF, Word (.docx) or text &middot; or drop it here</span>
       </div>
+      <span class="sub" style="margin:2px 0 0">No CV handy? Your LinkedIn profile works too: on LinkedIn open your profile, tap <b>More</b> (or <b>Resources</b>) &rarr; <b>Save to PDF</b>, then upload that file here.</span>
       <span class="status" id="fileStatus" role="status"></span>
     </div>
 
@@ -193,6 +245,12 @@
         <label for="f-salary">Minimum salary (JOD/month)</label>
         <input type="number" id="f-salary" min="0" step="10" inputmode="numeric" placeholder="Optional">
       </div>
+    </div>
+
+    <div class="field">
+      <label for="f-linkedin">LinkedIn profile (optional)</label>
+      <input type="text" id="f-linkedin" inputmode="url" maxlength="200" placeholder="linkedin.com/in/your-name">
+      <p class="sub">The scout looks at it alongside your CV when matching jobs.</p>
     </div>
 
     <div class="field">
@@ -376,6 +434,10 @@
       var c = [em && em[0], ph && ph[0]].filter(Boolean).join(' / ');
       if(c){ $('f-contact').value = c; notes.push('contact'); }
     }
+    if(!$('f-linkedin').value.trim()){
+      var li = text.match(/(?:https?:\/\/)?(?:[a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9_%-]+/i);
+      if(li){ $('f-linkedin').value = li[0]; notes.push('LinkedIn'); }
+    }
     var r = roles.addMany(detect(text, ROLE_GROUPS)), s = skills.addMany(detect(text, SKILL_GROUPS));
     if(r) notes.push(r + (r === 1 ? ' role' : ' roles'));
     if(s) notes.push(s + (s === 1 ? ' skill' : ' skills'));
@@ -388,6 +450,7 @@
     $('f-name').value = p.name || ''; roles.set(p.roles); skills.set(p.skills);
     $('f-cv').value = p.cv_text || ''; $('f-loc').value = p.locations || '';
     $('f-salary').value = p.min_salary == null ? '' : p.min_salary; $('f-contact').value = p.contact || '';
+    $('f-linkedin').value = p.linkedin_url || '';
   }
   function showForm(editing){
     $('formTitle').textContent = editing ? 'Edit your profile' : 'Tell us about you';
@@ -400,7 +463,8 @@
     var dl = $('summaryList'); dl.textContent = '';
     [['Name', p.name], ['Target roles', (p.roles||[]).join(', ') || '—'], ['Skills', (p.skills||[]).join(', ') || '—'],
      ['Location', p.locations || '—'], ['Min. salary', p.min_salary ? p.min_salary + ' JOD/month' : 'Not set'],
-     ['CV', p.cv_text ? 'On file (' + p.cv_text.length.toLocaleString() + ' characters)' : 'Not added']
+     ['CV', p.cv_text ? 'On file (' + p.cv_text.length.toLocaleString() + ' characters)' : 'Not added'],
+     ['LinkedIn', p.linkedin_url ? p.linkedin_url.replace(/^https:\/\/(www\.)?/, '') : 'Not added']
     ].forEach(function(r){
       var dt = document.createElement('dt'); dt.textContent = r[0];
       var dd = document.createElement('dd'); dd.textContent = r[1];
@@ -409,6 +473,28 @@
     $('summaryCard').hidden = false; $('form').hidden = true;
   }
   function showKey(k){ $('keyLink').value = linkFor(k); $('keyBox').hidden = false; }
+
+  function extLink(text, href){ var a = el('a', null, text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; }
+  function showLinkedIn(p){
+    var box = $('liLinks'); box.textContent = '';
+    (p.roles || []).slice(0, 6).forEach(function(r){
+      var q = r.replace(/\s*\(.*\)$/, '').split(' / ')[0];
+      box.appendChild(extLink(q + ' jobs →', 'https://www.linkedin.com/jobs/search/?keywords=' + encodeURIComponent(q) + '&location=Jordan'));
+    });
+    $('liBox').hidden = !box.children.length;
+  }
+  function fmtTime(d){ return new Date(d).toLocaleString(undefined, {weekday:'short', hour:'numeric', minute:'2-digit'}); }
+  function showRun(p){
+    var s = $('runStatus'), b = $('runBtn');
+    if(p.run_requested_at){
+      s.className = 'status runstatus queued';
+      s.textContent = 'Search queued at ' + fmtTime(p.run_requested_at) + '. New matches usually show up here within the hour. Refresh to check.';
+      b.disabled = true; b.textContent = 'Queued';
+    } else {
+      s.className = 'status runstatus'; s.textContent = '';
+      b.disabled = false; b.textContent = 'Run now';
+    }
+  }
 
   function band(s){ return s >= 60 ? ['Strong match','good'] : s >= 35 ? ['Worth a look','warn'] : ['Long shot','low']; }
   function el(tag, cls, text){ var e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
@@ -423,7 +509,13 @@
     if(m.matched && m.matched.length){ var t = el('div','tags'); m.matched.forEach(function(x){ t.appendChild(el('span','tag',x)); }); c.appendChild(t); }
     if(m.gaps && m.gaps.length) c.appendChild(el('p','gaps','Gaps: ' + m.gaps.join(' · ')));
     var f = el('div','foot'); f.appendChild(el('span','src', [m.source, m.salary, m.posted_at].filter(Boolean).join(' · ')));
-    if(m.url && /^https?:\/\//.test(m.url)){ var a = el('a', null, 'View posting →'); a.href = m.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; f.appendChild(a); }
+    var links = el('div','links');
+    var co = (m.company || '').replace(/\(.*?\)/g, '').trim();
+    if(co && !/confidential|recruiting for|not stated|human resources m\.e/i.test(m.company)){
+      links.appendChild(extLink('Who do you know here?', 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(co) + '&network=%5B%22F%22%2C%22S%22%5D'));
+    }
+    if(m.url && /^https?:\/\//.test(m.url)) links.appendChild(extLink('View posting →', m.url));
+    f.appendChild(links);
     c.appendChild(f); return c;
   }
   function renderMatches(list){
@@ -450,8 +542,9 @@
       if(!r[0]){ store(null); accessKey = null; profile = null; showForm(false); renderMatches([]); return; }
       profile = r[0]; accessKey = k; store(k);
       if(keyFromHash() !== k) history.replaceState(null, '', '#k=' + k);
-      showSummary(profile); showKey(k); setStamp(profile); renderMatches(r[1]);
-      $('newPersonBtn').hidden = false;
+      showSummary(profile); showKey(k); setStamp(profile); showRun(profile); showLinkedIn(profile); renderMatches(r[1]);
+      $('newPersonBtn').hidden = false; $('restoreBox').hidden = true; $('restoreBox').open = false;
+      maybeShowInstall();
     });
   }
 
@@ -498,10 +591,14 @@
       name: $('f-name').value.trim(), roles: roles.get(), skills: skills.get(),
       cv_text: $('f-cv').value.trim(), locations: $('f-loc').value.trim(),
       min_salary: $('f-salary').value ? String(Math.max(0, Math.round(Number($('f-salary').value)))) : '',
-      contact: $('f-contact').value.trim()
+      contact: $('f-contact').value.trim(),
+      linkedin_url: $('f-linkedin').value.trim()
     };
     if(!p.name || !p.roles.length || !p.skills.length){
       setStatus($('formStatus'), 'Add your name, at least one target role and at least one skill.', true); return;
+    }
+    if(p.linkedin_url && !/^(https?:\/\/)?([a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9_%-]+\/?$/i.test(p.linkedin_url)){
+      setStatus($('formStatus'), 'That LinkedIn link looks off. It should look like linkedin.com/in/your-name, or leave it empty.', true); $('f-linkedin').focus(); return;
     }
     $('saveBtn').disabled = true; setStatus($('formStatus'), 'Saving…');
     var editing = !!(profile && accessKey);
@@ -510,6 +607,16 @@
       .then(function(){ setStatus($('formStatus'), ''); if(!editing) $('keyBox').scrollIntoView({behavior:'smooth', block:'start'}); })
       .catch(function(err){ setStatus($('formStatus'), "Couldn't save: " + err.message + '. Check your connection and try again.', true); })
       .then(function(){ $('saveBtn').disabled = false; });
+  });
+  $('runBtn').addEventListener('click', function(){
+    var b = this; b.disabled = true; b.textContent = 'Queuing…';
+    rpc('request_run', {k:accessKey}).then(function(r){
+      if(r.status === 'queued'){ profile.run_requested_at = r.requested_at; showRun(profile); }
+      else if(r.status === 'too_soon'){
+        showRun(profile);
+        $('runStatus').textContent = 'Just searched for you. You can run it again after ' + fmtTime(r.next_at) + ', and it runs every evening anyway.';
+      } else { showRun(profile); $('runStatus').textContent = "Couldn't find your profile. Refresh the page and try again."; }
+    }).catch(function(){ showRun(profile); $('runStatus').textContent = "Couldn't reach the scout. Check your connection and try again."; });
   });
   $('editBtn').addEventListener('click', function(){ fill(profile); showForm(true); $('f-name').focus(); });
   $('cancelBtn').addEventListener('click', function(){ showSummary(profile); });
@@ -521,10 +628,43 @@
   });
   $('newPersonBtn').addEventListener('click', function(){
     store(null); accessKey = null; profile = null; history.replaceState(null, '', location.pathname);
-    $('keyBox').hidden = true; $('newPersonBtn').hidden = true; setStamp(null);
+    $('keyBox').hidden = true; $('newPersonBtn').hidden = true; $('installBar').hidden = true; $('restoreBox').hidden = false; setStamp(null);
     fill({}); showForm(false); renderMatches([]); window.scrollTo(0, 0);
   });
   window.addEventListener('hashchange', function(){ var k = keyFromHash(); if(k && k !== accessKey) load(k); });
+
+  // ---- Phone app: install prompt, restore, offline ----
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var installEvt = null;
+  function installDismissed(){ try{ return localStorage.getItem('jobscout.installHidden') === '1'; }catch(e){ return false; } }
+  function maybeShowInstall(){
+    if(isStandalone || installDismissed() || !profile) return;
+    if(installEvt){ $('installBtn').hidden = false; $('installHow').textContent = 'Opens like an app, straight to your matches.'; $('installBar').hidden = false; }
+    else if(isIOS){ $('installHow').textContent = 'In Safari, tap Share ↑ then “Add to Home Screen”.'; $('installBar').hidden = false; }
+  }
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); installEvt = e; maybeShowInstall(); });
+  window.addEventListener('appinstalled', function(){ $('installBar').hidden = true; });
+  $('installBtn').addEventListener('click', function(){
+    if(!installEvt) return;
+    installEvt.prompt();
+    installEvt.userChoice.then(function(){ installEvt = null; $('installBar').hidden = true; });
+  });
+  $('installClose').addEventListener('click', function(){ $('installBar').hidden = true; try{ localStorage.setItem('jobscout.installHidden','1'); }catch(e){} });
+
+  $('restoreBtn').addEventListener('click', function(){
+    var m = $('restoreInput').value.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    if(!m){ setStatus($('restoreStatus'), "That doesn't look like a Job Scout link. It ends in #k= followed by a long code.", true); return; }
+    setStatus($('restoreStatus'), 'Opening…');
+    load(m[0]).then(function(){
+      if(profile){ setStatus($('restoreStatus'), ''); $('restoreInput').value = ''; }
+      else setStatus($('restoreStatus'), "No profile found for that link. Check you copied all of it.", true);
+    }).catch(function(){ setStatus($('restoreStatus'), "Couldn't connect. Check your internet and try again.", true); });
+  });
+
+  if('serviceWorker' in navigator && location.protocol === 'https:'){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
 
   if(accessKey){
     load(accessKey).catch(function(){ showForm(false); setStatus($('formStatus'), "Couldn't load your profile. Check your connection and refresh.", true); });
