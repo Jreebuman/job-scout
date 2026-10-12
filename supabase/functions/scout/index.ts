@@ -173,6 +173,11 @@ async function akhtabootDetail(j: Job) {
 }
 
 // ---------- scoring ----------
+// Smallest "N years" the post asks for. Ranges like "2-5" or "2–5" count as their lower end; odd numbers (0, 25) are ignored.
+function yearsAsked(d: string): number {
+  const ns = [...d.matchAll(/\b(\d{1,2})\s*\+?\s*(?:(?:-|–|—|‑|to)\s*\d{1,2}\s*)?\+?\s*years?\b/g)].map((m) => +m[1]).filter((n) => n >= 1 && n <= 15);
+  return ns.length ? Math.min(...ns) : 0;
+}
 function careerYears(cv: string): number {
   const years = [...cv.matchAll(/\b(19[89]\d|20[0-2]\d)\b/g)].map((m) => +m[1]).filter((y) => y <= new Date().getFullYear());
   return years.length ? new Date().getFullYear() - Math.min(...years) : 0;
@@ -206,8 +211,7 @@ function score(p: Profile, j: Job, cvYears: number) {
   const hasDegree = /bachelor|university|b\.?sc|b\.a\b|degree|diploma|graduat/i.test(p.cv_text);
   const degreeAt = d.search(/bachelor|university degree|b\.?sc\b|degree in|college degree/);
   if (degreeAt >= 0 && !hasDegree) { const preferred = /prefer|plus|advantage|desirable/.test(d.slice(degreeAt, degreeAt + 120)); pts -= preferred ? 3 : 8; gaps.push(preferred ? "Degree preferred" : "Bachelor's degree required"); }
-  const yrs = [...d.matchAll(/(\d{1,2})\s*\+?\s*(?:-|to|–)?\s*(?:\d{1,2}\s*)?\+?\s*years?/g)].map((m) => +m[1]).filter((n) => n >= 1 && n <= 20);
-  const need = yrs.length ? Math.min(...yrs) : 0;
+  const need = yearsAsked(d);
   if (need && cvYears && need > cvYears + 1) { pts -= 8; gaps.push(`Asks for ${need}+ years`); }
   for (const lang of LANGS) {
     if (mine.includes(lang)) continue;
@@ -258,7 +262,7 @@ function summarize(j: Job, need: string[]): string {
 }
 function requirements(j: Job): string[] {
   const d = j.description.toLowerCase(), out: string[] = [];
-  const y = d.match(/([1-9]\d?)\s*\+?\s*(?:-|to|–)?\s*(?:\d{1,2}\s*)?\+?\s*years?/); if (y) out.push(`${y[1]}+ years' experience`);
+  const ys = yearsAsked(d); if (ys) out.push(`${ys}+ years' experience`);
   if (/bachelor|university degree|degree in/.test(d)) out.push("a degree");
   const langs = ["english", "arabic", ...LANGS].filter((l) => new RegExp(`\\b${l}\\b`).test(d)); if (langs.length) out.push(langs.map((l) => l[0].toUpperCase() + l.slice(1)).join(" and "));
   return out.slice(0, 3);
