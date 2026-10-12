@@ -245,11 +245,11 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
   <section id="onboardView" hidden>
     <div class="intro">
       <h2>Your own job scout for Jordan</h2>
-      <p>Upload your CV once. Every evening Job Scout checks Bayt, LinkedIn and Akhtaboot, ranks what fits you, and writes your application messages. You apply yourself; nothing is ever sent for you.</p>
+      <p>Upload your CV once. Every night Job Scout checks LinkedIn and Akhtaboot for jobs in Jordan, ranks what fits you, and drafts your application messages. You apply yourself; nothing is ever sent for you.</p>
       <div class="steps">
         <div><b>1. Upload your CV</b>We fill in your roles and skills.</div>
         <div><b>2. Get ranked jobs</b>Best fits first, with what each job involves.</div>
-        <div><b>3. Apply with a draft</b>English, Arabic and a cover letter, ready to copy.</div>
+        <div><b>3. Apply with a draft</b>English, Arabic and a cover letter to start from.</div>
       </div>
     </div>
     <details class="restore" id="restoreBox">
@@ -265,8 +265,8 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
   <!-- Jobs -->
   <section id="jobsView" hidden>
     <div class="howto">
-      <span><b>How it works:</b> every evening Job Scout searches Bayt, LinkedIn and Akhtaboot and adds jobs that fit your profile, best first. Tap <b>Run now</b> to search straight away.</span>
-      <span>Open a job, read what it involves, copy a draft and apply yourself. Nothing is ever sent or applied for you.</span>
+      <span><b>How it works:</b> every night Job Scout searches LinkedIn and Akhtaboot and adds jobs that fit your profile, best first. Tap <b>Run now</b> to search straight away; it takes about a minute.</span>
+      <span>Open a job, read what it involves, copy a draft, add a line about your own experience, and apply yourself. Nothing is ever sent or applied for you.</span>
     </div>
     <div class="runline" id="runLine">
       <span class="msg" id="runMsg"></span>
@@ -378,6 +378,7 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
 <script>
 (function(){
   var API = 'https://niuobwrxfiojobswgvau.supabase.co/rest/v1/rpc/';
+  var FUNC = 'https://niuobwrxfiojobswgvau.supabase.co/functions/v1/scout';
   var KEY = 'sb_publishable_1nCzzjXLhqnqkMhM25oMWg_YGK4Gux5';
   var STORE = 'jobscout.key';
   var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -387,7 +388,7 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
   ];
   var LABEL = { new: 'To review', shortlist: 'Shortlist', applied: 'Applied', interview: 'Interview', offer: 'Offer', skipped: 'Closed', rejected: 'Closed' };
   var DRAFTS = [ { key: 'msg_en', label: 'Message', lang: 'en' }, { key: 'msg_ar', label: '\u0639\u0631\u0628\u064a', lang: 'ar' }, { key: 'cover', label: 'Cover letter', lang: 'en' } ];
-  var SITES = ['Bayt', 'LinkedIn', 'Akhtaboot'];
+  var SITES = ['LinkedIn', 'Akhtaboot', 'Bayt'];
 
   var accessKey = keyFromHash() || stored();
   var profile = null, jobs = [], loaded = false, view = 'jobs', tab = 'new', site = 'all';
@@ -462,7 +463,7 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
 
     if(!rows.length){
       $('list').innerHTML = '<div class="empty">' + (!loaded ? '<b>Loading your jobs\u2026</b>' :
-        jobs.length === 0 ? '<b>No jobs yet</b><span>Job Scout searches every evening. Tap Run now to search straight away; results show up here within the hour.</span>' :
+        jobs.length === 0 ? '<b>No jobs yet</b><span>Job Scout searches every night. Tap Run now to search straight away; results show up here in about a minute.</span>' :
         '<b>Nothing here yet</b><span>' + (hidden ? hidden + ' lower-scoring job' + (hidden > 1 ? 's are' : ' is') + ' hidden. Untick \u201cHide scores under 60\u201d to see ' + (hidden > 1 ? 'them' : 'it') + '.' : 'Jobs move here when you change their status.') + '</span>') + '</div>';
       if(openId) renderDrawer();
       return;
@@ -529,8 +530,8 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
             ? '<div class="row" role="group">' + DRAFTS.map(function(d){ return '<button class="btn" type="button" data-draft="' + d.key + '" aria-pressed="' + (d.key === draftKey) + '"' + (j[d.key] ? '' : ' disabled') + '>' + d.label + '</button>'; }).join('') + '</div>' +
               '<div class="draft" id="draftText" lang="' + cur.lang + '">' + esc(j[draftKey] || '') + '</div>' +
               '<div class="row"><button class="btn" type="button" data-act="copy">Copy</button></div>' +
-              '<p class="warn">Read it through and fix anything that isn\u2019t true before you send it.</p>'
-            : '<p class="nodraft">Drafts are written for jobs scoring 60 or more. For this one, the job post and your CV are the place to start.</p>') +
+              '<p class="warn">A starting template built from your skills. Add a line or two about your own experience and check it before you send it.</p>'
+            : '<p class="nodraft">Drafts are made for jobs scoring 60 or more. For this one, the job post and your CV are the place to start.</p>') +
         '</div>' +
         (j.how_to_apply ? '<div class="blk"><h4>How to apply</h4><p class="mono" style="user-select:all; overflow-wrap:anywhere">' + esc(j.how_to_apply) + '</p></div>' : '') +
         '<dl class="facts">' +
@@ -589,33 +590,44 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
       ? 'This link is how you get back to your jobs on any phone or computer. Bookmark it or send it to yourself on WhatsApp. Anyone with it can see your jobs, so keep it to yourself.'
       : 'Opens your jobs on any phone or computer. Anyone with it can see them, so keep it to yourself.';
   }
+  var searchingHere = false;
   function showRun(){
-    var q = profile && profile.run_requested_at;
+    var q = searchingHere || (profile && profile.searching);
     $('runLine').classList.toggle('queued', !!q);
     $('runMsg').innerHTML = q
-      ? '<span class="dot"></span><b>Searching for you.</b> Queued ' + esc(fmtTime(q)) + '. New jobs usually show up within the hour; this page updates by itself.'
-      : (profile && profile.last_run_at ? '<b>Last searched ' + esc(ago(profile.last_run_at)) + '.</b> Next automatic search this evening.' : '<b>Not searched yet.</b> Tap Run now to start.');
+      ? '<span class="dot"></span><b>Searching LinkedIn and Akhtaboot for you\u2026</b> This takes about a minute. Keep this page open.'
+      : (profile && profile.last_run_at ? '<b>Last searched ' + esc(ago(profile.last_run_at)) + '.</b> It searches again automatically every night.' : '<b>Not searched yet.</b> Tap Run now to start.');
     [$('runBtn'), $('runBtnTop')].forEach(function(b){ b.disabled = !!q; b.textContent = q ? 'Searching\u2026' : 'Run now'; });
-    if(q && !pollTimer) pollTimer = setInterval(function(){ if(!document.hidden) refresh(true); }, 60000);
+    if(q && !searchingHere && !pollTimer) pollTimer = setInterval(function(){ if(!document.hidden) refresh(true); }, 20000);
     if(!q && pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   }
   function requestRun(){
-    [$('runBtn'), $('runBtnTop')].forEach(function(b){ b.disabled = true; b.textContent = 'Queuing\u2026'; });
-    rpc('request_run', { k: accessKey }).then(function(r){
-      if(r.status === 'queued'){ profile.run_requested_at = r.requested_at; showRun(); toast('Search started. Jobs usually show up within the hour.'); }
-      else if(r.status === 'too_soon'){ showRun(); toast('Just searched for you. Run it again after ' + fmtTime(r.next_at) + '.'); }
-      else { showRun(); toast("Couldn't find your profile. Refresh and try again."); }
-    }).catch(function(){ showRun(); toast("Couldn't reach Job Scout. Check your connection."); });
+    if(searchingHere || !accessKey) return;
+    searchingHere = true; showRun();
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 180000);
+    fetch(FUNC, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ k: accessKey }), signal: ctrl ? ctrl.signal : undefined })
+      .then(function(r){ return r.json(); })
+      .then(function(r){
+        searchingHere = false;
+        if(r.status === 'done'){ toast(r.saved > 0 ? 'Found ' + r.saved + ' new job' + (r.saved > 1 ? 's' : '') + ' for you.' : 'Searched ' + r.checked + ' jobs. Nothing new that fits right now; try again tomorrow.'); tab = 'new'; }
+        else if(r.status === 'too_soon') toast('You searched recently. Run it again after ' + fmtTime(r.next_at) + ', or wait for tonight\u2019s search.');
+        else if(r.status === 'running') toast('A search is already running for you. Results will appear here shortly.');
+        else toast("The search hit a problem. Try again in a few minutes.");
+        return refresh(true);
+      })
+      .catch(function(){ searchingHere = false; toast("Lost connection during the search. Your results may still arrive; refresh in a minute."); refresh(true); })
+      .then(function(){ clearTimeout(timer); showRun(); });
   }
 
   // ---------- Load ----------
   function load(k, silent){
     return Promise.all([rpc('get_profile', { k: k }), rpc('get_matches', { k: k })]).then(function(r){
       if(!r[0]){ if(!silent){ store(null); accessKey = null; profile = null; setView('jobs'); } return; }
-      var wasQueued = profile && profile.run_requested_at, before = jobs.length;
+      var wasSearching = !searchingHere && profile && profile.searching, before = jobs.length;
       profile = r[0]; accessKey = k; store(k); jobs = r[1] || []; loaded = true;
       if(keyFromHash() !== k) history.replaceState(null, '', '#k=' + k);
-      if(wasQueued && !profile.run_requested_at){ var n = jobs.length - before; toast(n > 0 ? 'Search done: ' + n + ' new job' + (n > 1 ? 's' : '') + '.' : 'Search done. No new jobs this time.'); }
+      if(wasSearching && !profile.searching){ var n = jobs.length - before; toast(n > 0 ? 'Search done: ' + n + ' new job' + (n > 1 ? 's' : '') + '.' : 'Search done. No new jobs this time.'); }
       if(!editing) showSummary(profile);
       showRun(); setView(view); render(); maybeShowInstall();
     });
@@ -807,7 +819,7 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
       return load(k).then(function(){
         setStatusText($('formStatus'), '');
         if(isEdit) toast('Profile saved. The next search uses it.');
-        else { toast('You\u2019re in. Your first search has started.'); window.scrollTo(0, 0); }
+        else { window.scrollTo(0, 0); requestRun(); }
       });
     }).catch(function(err){ setStatusText($('formStatus'), "Couldn't save: " + err.message + '. Check your connection and try again.', true); })
       .then(function(){ $('saveBtn').disabled = false; });
