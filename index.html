@@ -259,6 +259,12 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
         <button class="btn" type="button" id="restoreBtn">Open</button>
       </div>
       <span class="status" id="restoreStatus"></span>
+      <p style="margin:12px 0 0">Lost your link? Type the email you gave us and we'll send it to you.</p>
+      <div class="keyrow">
+        <input type="email" id="forgotInput" placeholder="you@example.com" aria-label="Your email" maxlength="200">
+        <button class="btn" type="button" id="forgotBtn">Email my link</button>
+      </div>
+      <span class="status" id="forgotStatus"></span>
     </details>
   </section>
 
@@ -359,7 +365,7 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
     </div>
     <div class="field">
       <label for="f-contact">Email or WhatsApp (optional)</label>
-      <input type="text" id="f-contact" maxlength="200" placeholder="Used in your drafts' sign-off if you like">
+      <input type="text" id="f-contact" maxlength="200" placeholder="Add your email to get your link back if you lose it">
     </div>
     <div class="formfoot">
       <button class="btn primary" type="submit" id="saveBtn">Save &amp; find my jobs</button>
@@ -886,6 +892,16 @@ textarea.cv { min-height: 140px; font-family: var(--mono); font-size: 13px; resi
   window.addEventListener('appinstalled', function(){ $('installBar').hidden = true; });
   $('installBtn').addEventListener('click', function(){ if(!installEvt) return; installEvt.prompt(); installEvt.userChoice.then(function(){ installEvt = null; $('installBar').hidden = true; }); });
   $('installClose').addEventListener('click', function(){ $('installBar').hidden = true; try{ localStorage.setItem('jobscout.installHidden', '1'); }catch(e){} });
+  $('forgotBtn').addEventListener('click', function(){
+    var email = $('forgotInput').value.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setStatusText($('forgotStatus'), 'Type the email address you gave us.', true); return; }
+    setStatusText($('forgotStatus'), 'Sending…'); $('forgotBtn').disabled = true;
+    fetch(FUNC.replace(/scout$/, 'send-link'), { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) })
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(){ setStatusText($('forgotStatus'), 'If that email is on a Job Scout profile, your link is on its way. Check spam too. If you gave a WhatsApp number instead, ask whoever shared Job Scout with you.'); })
+      .catch(function(){ setStatusText($('forgotStatus'), "Couldn't send right now. Try again in a few minutes.", true); })
+      .then(function(){ $('forgotBtn').disabled = false; });
+  });
   $('restoreBtn').addEventListener('click', function(){
     var m = $('restoreInput').value.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
     if(!m){ setStatusText($('restoreStatus'), "That doesn't look like a Job Scout link. It ends in #k= and a long code.", true); return; }
