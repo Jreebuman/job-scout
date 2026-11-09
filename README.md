@@ -11,7 +11,7 @@ A public, no-login job-matching site for Jordan. People upload a CV (or fill the
 ## Sources
 - **LinkedIn** public job search (Jordan only, last 30 days), with full descriptions for the best title matches.
 - **Akhtaboot** Jordan listings.
-- **Bayt and Tanqeeb block automated access** (Bayt returns 403; Tanqeeb serves an AWS bot-check). Job Scout does not try to get around these.
+- **Bayt, Tanqeeb and HiringCafe block automated access** (Bayt returns 403; Tanqeeb serves an AWS bot-check; HiringCafe serves a Cloudflare challenge to the site and its `/api/search-jobs` endpoint, checked 2026-11-09). Job Scout does not try to get around these. HiringCafe is searched in Tamimi's own Job Desk instead, where a real browser opens it.
 
 ## Scoring (no AI)
 Role fit (40) from title similarity to the person's target roles, with synonyms (team lead / supervisor, customer care / contact center, and so on) and level checks. Skills (30), 5 points per skill found in the post. Location (15). Salary (15) against their minimum. Penalties and gaps for: degree required, years of experience above theirs, languages they don't list, car/licence, technical software-testing roles, and specialist fields (pharma/clinical/lab, engineering, accounting certifications). Jobs requiring a license clearly outside their profile, or located outside Jordan, are skipped. Drafts are templates for jobs scoring 60+.
